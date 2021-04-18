@@ -6,6 +6,7 @@
 package com.mycompany.assignment2part2;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.util.TimerTask;
@@ -13,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
+//import javax.swing.JList;
 import javax.swing.Timer;
 
 /**
@@ -28,7 +29,6 @@ public  class Server extends javax.swing.JFrame {
     public Server() {
         initComponents();
         listModel = new DefaultListModel<>();
-         onlineList = new String[1000];
     }
 
     /**
@@ -78,6 +78,42 @@ public  class Server extends javax.swing.JFrame {
             String[] strings = {};
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
+        });
+        jList1.addContainerListener(new java.awt.event.ContainerAdapter() {
+            public void componentAdded(java.awt.event.ContainerEvent evt) {
+                jList1ComponentAdded(evt);
+            }
+        });
+        jList1.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                jList1AncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
+        jList1.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+                jList1InputMethodTextChanged(evt);
+            }
+        });
+        jList1.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                jList1PropertyChange(evt);
+            }
+        });
+        jList1.addVetoableChangeListener(new java.beans.VetoableChangeListener() {
+            public void vetoableChange(java.beans.PropertyChangeEvent evt)throws java.beans.PropertyVetoException {
+                jList1VetoableChange(evt);
+            }
+        });
+        jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jList1ValueChanged(evt);
+            }
         });
         jScrollPane1.setViewportView(jList1);
 
@@ -146,29 +182,52 @@ public  class Server extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
     private ServerSocket listenSocket ;
-    private  DefaultListModel<String> listModel ;
-    public static String onlineList[];
-    private int i = 0;
+    private BufferedReader inFromClient;
+    private void sendClient(){
+        try{
+            DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
+            outToClient.writeBytes(listModel +"\n");
+            System.out.println("send to clinetssssssss");
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+    public static  DefaultListModel<String> listModel ;
+
+    private String sentence;
+    private Socket connection ;
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         //server start listening 
-        //onlineList = new String[1000];
-        
+
         try{
             listenSocket = new ServerSocket(Integer.parseInt(serverPortText.getText()));
-            
-            //while(true){
+
                 
                 Runnable helloRunnable = new Runnable() {
                     public void run() {
                         try {
-                            Socket connection = listenSocket.accept();
-                            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                            String sentence = inFromClient.readLine();
+                            while(true){
+                            connection = listenSocket.accept();
+                            inFromClient = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                            sentence = inFromClient.readLine();
+                            String arr[] = sentence.split(",");
                             
-                            listModel.addElement(sentence);
-                            jList1.setModel(listModel);
-                            System.out.println(onlineList);
+                            if(arr[0].equals("offline")){
+                                listModel.removeElement(arr[1]);
+                                sendClient();
+                            }
+                            else{
+                                listModel.addElement(arr[1]);
+                                Client.listModel.addElement(arr[1]);
+                                jList1.setModel(listModel);
+                                DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
+                                outToClient.writeBytes(listModel +"\n");
+                                sendClient();
+                            }
+                            
+                            }
                             
                         }
                         catch(Exception ex){
@@ -185,7 +244,6 @@ public  class Server extends javax.swing.JFrame {
             ex.printStackTrace();
         }
         
-        //listenSocket.close();
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -195,8 +253,38 @@ public  class Server extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        System.out.println(listModel);
+       
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
+        // TODO add your handling code here:
+        System.out.println("changed hhhhh");
+    }//GEN-LAST:event_jList1ValueChanged
+
+    private void jList1VetoableChange(java.beans.PropertyChangeEvent evt)throws java.beans.PropertyVetoException {//GEN-FIRST:event_jList1VetoableChange
+        // TODO add your handling code here:
+        System.out.println("changed yyyyyyy");
+    }//GEN-LAST:event_jList1VetoableChange
+
+    private void jList1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jList1PropertyChange
+        // TODO add your handling code here:
+        System.out.println("changed xxxxxxxxxx");
+    }//GEN-LAST:event_jList1PropertyChange
+
+    private void jList1ComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_jList1ComponentAdded
+        // TODO add your handling code here:
+        System.out.println("adddddeeddd");
+    }//GEN-LAST:event_jList1ComponentAdded
+
+    private void jList1InputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jList1InputMethodTextChanged
+        // TODO add your handling code here:
+        System.out.println("wwww ?? www ");
+    }//GEN-LAST:event_jList1InputMethodTextChanged
+
+    private void jList1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jList1AncestorAdded
+        // TODO add your handling code here:
+        System.out.println("pleaaaaaaaaaaaaaaaase");
+    }//GEN-LAST:event_jList1AncestorAdded
 
     /**
      * @param args the command line arguments
@@ -240,7 +328,7 @@ public  class Server extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JList<String> jList1;
+    public static javax.swing.JList<String> jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField serverPortText;
