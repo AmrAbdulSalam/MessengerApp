@@ -5,6 +5,7 @@
  */
 package com.mycompany.assignment2part2;
 
+import static com.mycompany.assignment2part2.Client.statusText;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -29,6 +30,8 @@ public  class Server extends javax.swing.JFrame {
     public Server() {
         initComponents();
         listModel = new DefaultListModel<>();
+        listModel2 = new DefaultListModel<>();
+        
     }
 
     /**
@@ -183,18 +186,31 @@ public  class Server extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
     private ServerSocket listenSocket ;
     private BufferedReader inFromClient;
-    private void sendClient(){
+    private void sendClient(String st , Socket soc){
         try{
-            DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
-            outToClient.writeBytes(listModel +"\n");
-            System.out.println("send to clinetssssssss");
+            if("offline".equals(st)){
+                listModel2.removeElement(soc);
+                soc.close();
+                
+            }
+            for(int i = 0 ; i < listModel2.getSize() ; i++){
+                DataOutputStream outToClient = new DataOutputStream(listModel2.getElementAt(i).getOutputStream());
+                outToClient.writeBytes(listModel +"\n");  
+            }
+            if("offline".equals(st)){
+                Client client = new Client();
+                for(int i = 0 ; i < listModel2.getSize() ; i++){
+                    client.userOut(soc);
+                }
+            }
         }
         catch(Exception ex){
             ex.printStackTrace();
         }
     }
     public static  DefaultListModel<String> listModel ;
-
+    public static  DefaultListModel<Socket> listModel2 ;
+    private int i = 0 ;
     private String sentence;
     private Socket connection ;
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -202,32 +218,41 @@ public  class Server extends javax.swing.JFrame {
         //server start listening 
 
         try{
-            listenSocket = new ServerSocket(Integer.parseInt(serverPortText.getText()));
-
-                
+            listenSocket = new ServerSocket(Integer.parseInt(serverPortText.getText()));   
                 Runnable helloRunnable = new Runnable() {
                     public void run() {
                         try {
                             while(true){
                             connection = listenSocket.accept();
                             inFromClient = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                            sentence = inFromClient.readLine();
+                            sentence = inFromClient.readLine();                         
                             String arr[] = sentence.split(",");
                             
                             if(arr[0].equals("offline")){
                                 listModel.removeElement(arr[1]);
-                                sendClient();
+                                
+                                for(int i = 0 ; i < listModel2.getSize() ;i++){
+                                    
+                                    if(listModel2.get(i).getPort() == Integer.parseInt(arr[2])){
+                                        listModel2.removeElementAt(i);
+                                    }
+                                }
+                                sendClient("offline" , connection);
+                                Client.listModel.removeAllElements();
                             }
                             else{
+
                                 listModel.addElement(arr[1]);
-                                Client.listModel.addElement(arr[1]);
+                                listModel2.addElement(connection);
+                                Client.listModel.removeAllElements();
                                 jList1.setModel(listModel);
-                                DataOutputStream outToClient = new DataOutputStream(connection.getOutputStream());
-                                outToClient.writeBytes(listModel +"\n");
-                                sendClient();
+                                sendClient("online" , connection);
+                                
                             }
                             
                             }
+                            
+                            
                             
                         }
                         catch(Exception ex){
@@ -258,32 +283,30 @@ public  class Server extends javax.swing.JFrame {
 
     private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
         // TODO add your handling code here:
-        System.out.println("changed hhhhh");
+
     }//GEN-LAST:event_jList1ValueChanged
 
     private void jList1VetoableChange(java.beans.PropertyChangeEvent evt)throws java.beans.PropertyVetoException {//GEN-FIRST:event_jList1VetoableChange
         // TODO add your handling code here:
-        System.out.println("changed yyyyyyy");
+        
     }//GEN-LAST:event_jList1VetoableChange
 
     private void jList1PropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_jList1PropertyChange
-        // TODO add your handling code here:
-        System.out.println("changed xxxxxxxxxx");
+
     }//GEN-LAST:event_jList1PropertyChange
 
     private void jList1ComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_jList1ComponentAdded
         // TODO add your handling code here:
-        System.out.println("adddddeeddd");
+  
     }//GEN-LAST:event_jList1ComponentAdded
 
     private void jList1InputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_jList1InputMethodTextChanged
-        // TODO add your handling code here:
-        System.out.println("wwww ?? www ");
+        // TODO add your handl
+       
     }//GEN-LAST:event_jList1InputMethodTextChanged
 
     private void jList1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jList1AncestorAdded
         // TODO add your handling code here:
-        System.out.println("pleaaaaaaaaaaaaaaaase");
     }//GEN-LAST:event_jList1AncestorAdded
 
     /**

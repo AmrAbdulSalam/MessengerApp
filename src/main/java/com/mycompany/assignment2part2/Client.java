@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  *
@@ -35,6 +36,7 @@ public class Client extends javax.swing.JFrame {
         initComponents();
         //listModel = new DefaultListModel<>();
         //jList1 = new JList<string>();
+        statusText = new JTextField();
         try {
             //jComboBox1.addItem("----------------------------------------------------------");
             InetAddress ip = InetAddress.getLocalHost();
@@ -166,6 +168,11 @@ public class Client extends javax.swing.JFrame {
         jLabel8.setText("Status :");
 
         statusText.setEditable(false);
+        statusText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                statusTextActionPerformed(evt);
+            }
+        });
 
         jLabel9.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel9.setText("TCP Server IP :");
@@ -321,9 +328,13 @@ public class Client extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    public void userOut(Socket soc){
+        String st = "User logged out \n" + soc;
+        //statusText.setText(st);
+        JOptionPane.showMessageDialog(this, st);
+    }
     private Socket clientSocket;
-    
+    private  ThreadClient thread;
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         
@@ -336,46 +347,17 @@ public class Client extends javax.swing.JFrame {
             String serverIp = serverIpText.getText();
             String serverPort = serverPortText.getText();
             int port = Integer.parseInt(serverPort);
-            ThreadClient thread = new ThreadClient();
-            thread.init(serverIp , port , localIpText.getText() ,localPortText.getText());
+            try{
+            clientSocket = new Socket(serverIp , port);
+            thread = new ThreadClient();
+            thread.init(serverIp , port , localIpText.getText() ,localPortText.getText() , clientSocket);
             thread.start();
             jList1.setModel(listModel);
-//            try{
-//                clientSocket = new Socket(serverIp , port);
-//                DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-//                String sentence = localIpText.getText() + ":" + localPortText.getText();
-//                outToServer.writeBytes(sentence+"\n");
-//                BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-//                
-//                Runnable helloRunnable = new Runnable() {
-//                    String onlineUsers = inFromServer.readLine();
-//                    public void run() {
-//                        try{
-//                            onlineUsers = onlineUsers.replace("[", "");
-//                            onlineUsers = onlineUsers.replace("]", "");
-//                            String [] online = onlineUsers.split(", ");
-//                            listModel.removeAllElements();
-//                            for(int i = 0 ; i < online.length ;i++){
-//                                
-//                                listModel.addElement(online[i]);
-//                            }
-//                            System.out.println(listModel);
-//                            jList1.setModel(listModel);
-//                                                  
-//
-//                        }
-//                        catch(Exception ex){
-//                            ex.printStackTrace();
-//                        }
-//                    }
-//                };
-//                ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//                executor.scheduleAtFixedRate(helloRunnable, 0, 1, TimeUnit.SECONDS);
-//                //clientSocket.close();
-//            }
-//            catch(Exception ex){
-//                ex.printStackTrace();
-//            }
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+            }
+
                 
         }
     }//GEN-LAST:event_jButton1ActionPerformed
@@ -471,12 +453,14 @@ public class Client extends javax.swing.JFrame {
         String serverPort = serverPortText.getText();
         int port = Integer.parseInt(serverPort);
          try{
-            
-            clientSocket = new Socket(serverIp , port);
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            String sentence = "offline,"+localIpText.getText() + ":" + localPortText.getText();
+            Socket soc = new Socket(serverIp , port);
+            //clientSocket.connect(ip);
+            DataOutputStream outToServer = new DataOutputStream(soc.getOutputStream());
+            System.out.println("hello : "+clientSocket.getLocalSocketAddress());
+            String sentence = "offline,"+localIpText.getText() + ":" + localPortText.getText()+","+clientSocket.getLocalPort();
             outToServer.writeBytes(sentence+"\n");
-            
+            //thread.stop();
+            //clientSocket.close();
         }
         catch(Exception ex){
             ex.printStackTrace();
@@ -484,15 +468,19 @@ public class Client extends javax.swing.JFrame {
         localPortText.setText("");
         messageArea.setText("");
         usernameText.setText("");
-        listModel.removeAllElements();
         serverPortText.setText("");
         serverIpText.setText("");
         remoteIpText.setText("");
         remotePortText.setText("");
-        
+        listModel.removeAllElements();
+        jList1.setModel(listModel);
         //send to server you loggout
        
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void statusTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statusTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_statusTextActionPerformed
 
     /**
      * @param args the command line arguments
@@ -520,7 +508,6 @@ public class Client extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(Client.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        System.out.println("welcome");
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
