@@ -191,7 +191,6 @@ public  class Server extends javax.swing.JFrame {
             if("offline".equals(st)){
                 listModel2.removeElement(soc);
                 soc.close();
-                
             }
             for(int i = 0 ; i < listModel2.getSize() ; i++){
                 DataOutputStream outToClient = new DataOutputStream(listModel2.getElementAt(i).getOutputStream());

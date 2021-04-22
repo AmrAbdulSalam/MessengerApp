@@ -381,7 +381,7 @@ public class Client extends javax.swing.JFrame {
            }
            else{
                 // TODO add your handling code here:
-                usernameText.setEnabled(false);
+                //usernameText.setEnabled(false);
                 String messageSent = "";
                 messageSent = textEnter.getText();
                 String username = usernameText.getText();
@@ -391,7 +391,7 @@ public class Client extends javax.swing.JFrame {
 
                 try {
                     messageSent = username +": " + messageSent;
-                     serverth.sendTo(ip, messageSent);
+                    serverth.sendTo(ip, messageSent);
 
                 } catch (Exception ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -410,6 +410,7 @@ public class Client extends javax.swing.JFrame {
     public InetSocketAddress ip ; 
     public Threadser serverth;
     public boolean flag = false;
+    private int setupi = 0;
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
         if(localIpText.getText().isEmpty() || localPortText.getText().isEmpty() || remoteIpText.getText().isEmpty() || remotePortText.getText().isEmpty()){
@@ -429,11 +430,22 @@ public class Client extends javax.swing.JFrame {
                 ex.printStackTrace();
             }
             //data();
-            serverth = new Threadser();
-            serverth.createSocket(localPort);
-            System.out.println("socket build");
-            serverth.start();
-            System.out.println("server started");
+            if(setupi >= 1){
+                serverth.stop();
+                serverth = new Threadser();
+                serverth.createSocket(localPort);
+                serverth.start();
+            }
+            else{
+                serverth = new Threadser();
+                serverth.createSocket(localPort);
+                System.out.println("socket build");
+            
+                setupi++;
+                serverth.start();
+                System.out.println("server started");
+            }
+            
         }
         
     }//GEN-LAST:event_jButton4ActionPerformed

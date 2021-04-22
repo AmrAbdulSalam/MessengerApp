@@ -54,7 +54,10 @@ public class Threadser implements Runnable{
         Thread thread = new Thread(this);
         thread.start();
     }
-    
+    public void stop (){
+        //running = false;
+        socket.close();
+    }
     
     public void sendTo(InetSocketAddress address , String mesg){
         try{
