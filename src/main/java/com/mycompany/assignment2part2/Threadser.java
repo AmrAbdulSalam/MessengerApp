@@ -40,7 +40,7 @@ public class Threadser implements Runnable{
                 data = packet.getData();
                 String message = new String(data);
                 System.out.println("from me"+message);
-                
+                Client.statusText.setText("received from " + packet.getAddress() +" : " + packet.getPort());
                 Client.messageArea.append(message + '\n');
                 Client.statusText.setText("Recevied From IP = " + packet.getAddress() + " , Port = " + packet.getPort());
             }

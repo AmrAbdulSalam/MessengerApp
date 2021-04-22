@@ -36,7 +36,7 @@ public class Client extends javax.swing.JFrame {
         initComponents();
         //listModel = new DefaultListModel<>();
         //jList1 = new JList<string>();
-        statusText = new JTextField();
+        //statusText = new JTextField();
         try {
             //jComboBox1.addItem("----------------------------------------------------------");
             InetAddress ip = InetAddress.getLocalHost();
